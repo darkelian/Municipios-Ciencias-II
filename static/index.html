@@ -3,17 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa con Leaflet</title>
+    <title>Mapa Dinámico</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 <body>
-    <h1>Mapa de Bogotá Cundinamarca</h1>
-    <div id="map" style="height: 500px;"></div>
+    <h1>Enviar coordenadas y pintar mapa</h1>
+
+    <!-- Formulario para enviar las coordenadas -->
+    <form id="locationForm">
+        <label for="latitude">Latitud:</label>
+        <input type="number" id="latitude" name="latitude" step="any" required><br><br>
+
+        <label for="longitude">Longitud:</label>
+        <input type="number" id="longitude" name="longitude" step="any" required><br><br>
+
+        <label for="altitude">Altitud:</label>
+        <input type="number" id="altitude" name="altitude" step="any" required><br><br>
+
+        <button type="submit">Enviar Coordenadas</button>
+    </form>
+
+    <!-- Contenedor del mapa -->
+    <div id="map" style="height: 500px; margin-top: 20px;"></div>
 
     <script>
-        // Hacemos la solicitud al servicio de FastAPI
-        fetch('/api/location?place=Bogota Cundinamarca')
+        const form = document.getElementById('locationForm');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();  // Prevenir el envío estándar del formulario
+
+            const latitude = document.getElementById('latitude').value;
+            const longitude = document.getElementById('longitude').value;
+            const altitude = document.getElementById('altitude').value;
+
+            // Realizar una petición POST al endpoint de FastAPI
+            fetch('/api/set_location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    latitude: parseFloat(latitude),
+                    longitude: parseFloat(longitude),
+                    altitude: parseFloat(altitude)
+                })
+            })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -21,7 +56,7 @@
                     const longitude = data.data.longitude;
                     const altitude = data.data.altitude;
 
-                    // Inicializamos el mapa con las coordenadas
+                    // Inicializar el mapa con las nuevas coordenadas
                     var map = L.map('map').setView([latitude, longitude], 13);
 
                     // Añadir el tile layer desde OpenStreetMap
@@ -29,16 +64,17 @@
                         attribution: '© OpenStreetMap contributors'
                     }).addTo(map);
 
-                    // Añadir un marcador en la ubicación
+                    // Añadir un marcador en la nueva ubicación
                     L.marker([latitude, longitude])
                         .addTo(map)
                         .bindPopup(`Altitud: ${altitude} m`)
                         .openPopup();
                 } else {
-                    alert("No se pudo obtener la ubicación.");
+                    alert("Error al recibir los datos.");
                 }
             })
-            .catch(error => console.error('Error fetching data:', error));
+            .catch(error => console.error('Error al enviar los datos:', error));
+        });
     </script>
 </body>
 </html>

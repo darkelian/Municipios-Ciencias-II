@@ -1,24 +1,31 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from utils.response import full_success_response, fail_success_response
+from routers import city, location, department
 
 app = FastAPI()
 
 # Montar la carpeta "static" para servir el index.html
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Servicio que devuelve los datos de ubicación (Ejemplo para Bogotá)
-@app.get("/api/location")
-async def get_location(place: str):
-    if place == "Bogota Cundinamarca":
-        return JSONResponse(content={
-            "success": True,
-            "data": {
-                "latitude": 4.91857,
-                "longitude": -74.02799,
-                "altitude": 2559.0
-            },
-            "count": 1
-        })
-    else:
-        return JSONResponse(content={"success": False, "message": "Location not found"})
+# Incluir los routers de los otros endpoints
+app.include_router(city.router)
+app.include_router(location.router)
+app.include_router(department.router)
+
+# Modelo para el body de la petición con las coordenadas
+class Coordinates(BaseModel):
+    latitude: float
+    longitude: float
+    altitude: float
+
+# Endpoint para recibir coordenadas
+@app.post("/api/set_location")
+async def set_location(coordinates: Coordinates):
+    return full_success_response({
+        "latitude": coordinates.latitude,
+        "longitude": coordinates.longitude,
+        "altitude": coordinates.altitude
+    })
