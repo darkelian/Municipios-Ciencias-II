@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from utils.response import full_success_response, fail_success_response
 from routers import city, location, department
-from algoritm import aStar, neighbors
+from algoritm import aStar, best, neighbors
 
 app = FastAPI()
 
@@ -40,6 +40,13 @@ graph = neighbors.getGraph()
 path = aStar.aStar(graph,ini,goal,neighbors.getPosition())
 
 if path:
-    print("Path found:", path)
+    print("Path A* found:", path)
 else:
     print("No path found between", ini, "and", goal)
+
+path = best.greedyBestFirstSearch(graph,ini,goal,neighbors.getPosition())
+
+if path:
+    print("Path Greedy found:", path)
+else:
+    print("No path found between", ini, "and", goal)   

@@ -1,4 +1,5 @@
 import heapq
+
 def aStar(graph,initial, goal,position):
     #Estructura
     openSet = [(0, initial)]  # (fCost, nodo)
