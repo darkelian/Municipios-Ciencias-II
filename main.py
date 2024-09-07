@@ -34,8 +34,8 @@ async def set_location(coordinates: Coordinates):
 
 
 
-ini = 'Bogotá'
-goal = 'Aipe'
+ini = 'Tauramena'
+goal = 'Bogotá'
 graph = neighbors.getGraph()
 path = aStar.aStar(graph,ini,goal,neighbors.getPosition())
 

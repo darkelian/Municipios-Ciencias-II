@@ -68,6 +68,3 @@ def getPosition():
         'Yopal':280
     }
     return position
-
-    
-    
